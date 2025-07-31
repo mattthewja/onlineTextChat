@@ -1,0 +1,18 @@
+# Node modules (don't commit dependencies)
+backend/node_modules/
+
+# Logs
+*.log
+
+# Environment config (API keys, secrets)
+.env
+backend/.env
+
+# OS and editor clutter
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Test coverage output
+coverage/

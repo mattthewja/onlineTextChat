@@ -8,6 +8,7 @@ const devMode = true;
 
 //* Storage
 const rooms = devMode ? require('./seed') : {}; // This is where we store our rooms
+app.locals.rooms = rooms;
 
 app.use(express.json()); // Tells app to automatically parse JSON in incoming requests. 
 
@@ -24,7 +25,7 @@ app.post('/createRoom', (req, res) => {
 
     // Validate input
     if (!name || !owner) {
-        return res.status(400).json({ error: 'Room name and existing username are required'});
+        return res.status(400).json({ error: 'Room name and username are required'});
     }
     
     rooms[roomId] = { 
@@ -35,7 +36,7 @@ app.post('/createRoom', (req, res) => {
     }; 
     rooms[roomId].users.add(owner);
 
-    res.status(201).json({ roomId });
+    res.status(201).json({ success: `room ${roomId}:${name} created`, roomId: roomId });
 });
 
 // Join room
@@ -81,13 +82,13 @@ app.delete('/deleteRoom', (req, res) => {
         return res.status(403).json({ error: 'Only room owner can delete'});
     }
 
-    delete(rooms[roomId]);
-    return res.status(200).json({ message: `Successfully deleted room ${room.name}`})
+    delete rooms[roomId];
+    return res.status(200).json({ error: `Successfully deleted room ${room.name}`})
 })
 
 // Get room info
 app.get('/getRoom', (req, res) => {
-    const { roomId } = req.body;
+    const { roomId } = req.query;
 
     // Validate input
     if (!roomId) {
@@ -97,13 +98,13 @@ app.get('/getRoom', (req, res) => {
     const room = rooms[roomId];
 
     if (!room) {
-        return res.status(404).json( {error: 'Room not found'})
+        return res.status(404).json({ error: 'Room not found'})
     }
 
     return res.json({ ...room, users: Array.from(room.users)});
 })
 
-// Get all roomId:Name //* WIP
+// Get all roomId:Name 
 app.get('/getAllRooms', (req, res) => {
     const roomSummaries = Object.entries(rooms).map(([roomId, room]) => ({
         roomId,
@@ -111,6 +112,46 @@ app.get('/getAllRooms', (req, res) => {
     }))
 
     return res.json(roomSummaries);
+})
+
+// Leave room
+app.post('/leaveRoom', (req, res) => {
+    const { roomId, username } = req.body;
+    
+    // Validate input
+    if (!roomId) {
+        return res.status(400).json({ error: 'roomId is required'});
+    }
+    const room = rooms[roomId];
+
+    if (!room) {
+        return res.status(404).json({ error: 'Room not found'});
+    }
+
+    rooms.users.delete(username);
+    return res.json({ success: `Left ${roomId}:${room.name}`});
+})
+
+// Kick members
+app.post('/kickUser', (req, res) => {
+    const { roomId, owner, username, userToKick } = req.body;
+
+    // Validate input
+    if (!roomId) {
+        return res.status(400).json({ error: 'roomId is required'});
+    }
+    if (owner != username) {
+        return res.status(403).json({ error: 'Only the owner of a room can kick'});
+    }
+    if (!room.users.has(userToKick)) {
+        return res.status(404).json({ error: 'User not found in chat'});
+    }
+    if (owner = userToKick) {
+        return res.status(403).json({ error: 'Cannot kick owner from chat'});
+    }
+
+    rooms.users.delete(userToKick);
+    return res.json({ success: `Kicked ${userToKick}`});
 })
 
 //* Message routes
@@ -166,3 +207,4 @@ app.listen(PORT, () => { // Starts Express server and has it listen at port 3000
     console.log(`Backend is running at http://localhost:${PORT}`);
 });
 
+module.exports = app;
