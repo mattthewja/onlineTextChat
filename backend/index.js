@@ -1,6 +1,13 @@
 // backend/index.js
-const express = require('express'); // Import express library. Framework for creating servers and routes
+const express = require('express'); // Import express from library. Framework for creating servers and routes
+const { createServer } = require('node:http'); // Part of socket.io
+const { join } = require('node:path'); // Part of socket.io
+const { Server } = require('socket.io'); // Import Server from socket.io for our Server
+
 const app = express(); // Create an express instance called app. Used to define routes, middleware, and configure server
+const server = createServer(app);
+const io = new Server(server);
+
 const PORT = 3000; // Defines port number for server. In this case: http://localhost:3000
 
 //* Dev Tools
@@ -11,10 +18,18 @@ const rooms = devMode ? require('./seed') : {}; // This is where we store our ro
 app.locals.rooms = rooms;
 
 app.use(express.json()); // Tells app to automatically parse JSON in incoming requests. 
+app.use(express.static('../frontend'));
 
 app.get('/', (req, res) => { 
     res.json({ message: 'Backend is working' }); 
 });
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('disconnect', () => {
+        console.log('a user disconnected');
+    })
+})
 
 //* Room routes
 
@@ -201,10 +216,9 @@ app.get('/getMessages', (req, res) => {
 
 
 
-//* Required for app to run. This opens the express app to be contactable.
+//* Required for server to run. This opens the express app to be contactable.
 
-app.listen(PORT, () => { // Starts Express server and has it listen at port 3000.
+// used to be app.listen...
+server.listen(PORT, () => { // Starts Express server and has it listen at port 3000.
     console.log(`Backend is running at http://localhost:${PORT}`);
 });
-
-module.exports = app;
