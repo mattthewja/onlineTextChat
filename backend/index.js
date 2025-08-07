@@ -74,8 +74,7 @@ app.post('/joinRoom', (req, res) => {
     }
 
     room.users.add(username);
-
-    res.status(200).json( {message: `Joined room ${roomId} as ${username}`});
+    res.status(200).json( {message: `Joined room ${roomId} as ${username}`, roomId: roomId});
 })
 
 // Delete room

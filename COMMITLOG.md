@@ -1,0 +1,2 @@
+- feat: basic frontend UI
+- feat: basic frontend - backend integration
