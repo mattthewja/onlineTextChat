@@ -7,7 +7,7 @@
 
 <body>
     <div id="screen-flex-container" class="container">
-        <h1>Test Title</h1>
+        <h1>Online Text Chat v1</h1>
         <div id="username-info" class="container">
             <div class="container">
                 <label for="username-input">Username: </label>
@@ -57,17 +57,12 @@
         </div>
 
         <div id="message-box">
-            <textarea
-            id="message-input"
-            rows="5"
-            cols="103"
-            placeholder="Type your message here"></textarea>
+            <textarea id="message-input" placeholder="Type your message here"></textarea>
             <button id="send-message-button">send</button>
         </div>
     </div>
 
     <script src="socket.io/socket.io.js"></script> <!-- this path root/socket.io/socket.io.js is served to the user automatically with node + http or express -->
-    <script>const socket = io();</script>
     <script src="script.js"></script>
 </body>
 

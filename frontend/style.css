@@ -84,6 +84,17 @@ html {
 #chatbox-info .message .message-info {
     position: relative;
     border: solid 1px black;
-    height:inherit;
+    height: inherit;
     width: 70%;
+}
+
+#message-box #message-input {
+    width: 100%;
+    max-width: 100vm;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+#message-box #send-message-button {
+    
 }

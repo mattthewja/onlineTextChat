@@ -1,111 +1,9 @@
-const root = "http://localhost:3000/"
+//* DOM, Constants, States
 
-// frontend functions
-function setUsername() {
-    username = usernameText.value;
-};
+const root = "http://localhost:3000/";
+const socket = io(`${root}`);
 
-function resetUsername() {
-    username = "";
-    usernameText.value = "";
-    usernameButton.disabled = false;
-    usernameText.disabled = false;
-};
 
-function updateMessages() {
-    const messages = fetch(`${root}getMessages`, {
-        method: "GET",
-        body: JSON.stringify({
-            roomId: currentRoomId
-        })
-    });
-
-    chatbox.innerHTML = "";
-    messages.array.forEach(messageData => {
-        const chatbox = document.getElementById("chatbox-info");
-
-        const { sender, message } = messageData;
-        const messageDiv = document.createElement("div");
-        messageDiv.className = "message";
-
-        const userInfo = document.createElement("div");
-        userInfo.className = "user-info";
-        userInfo.innerHTML = sender;
-
-        const messageInfo = document.createElement("div");
-        messageInfo.className = "message-info";
-        messageInfo.innerHTML = message;
-
-        messageDiv.appendChild(userInfo);
-        messageDiv.appendChild(messageInfo);
-        chatbox.appendChild(messageDiv);
-    });
-};
-
-// backend integration functions
-async function createRoom() {
-    const res = await fetch(`${root}createRoom`, {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            name: roomnameText.value,
-            owner: username
-        })
-    });
-    console.log(res.json());
-    currentRoomId = res.body.roomId;
-    console.log(currentRoomId);
-};
-
-async function joinRoom() {
-    const res = await fetch(`${root}joinRoom`, {
-        method: "POST",
-        header: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            roomId: roomIdText.value,
-            username: username
-        })
-    });
-
-    currentRoomId = res.body.roomId;
-}
-
-async function deleteRoom() {
-    const res = await fetch(`${root}deleteRoom`, {
-        method: "POST", 
-        header: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            roomId: currentRoomId,
-            username: username
-        })
-    });
-
-    currentRoomId = "";
-}
-
-async function sendMessage() {
-    const res = await fetch(`${root}sendMessage`, {
-        method: "POST",
-        header: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            roomId: currentRoomId,
-            message: messageText.value,
-            username: username
-        })
-    });
-
-    messageText.value = "";
-};
-
-// basic setup
 const usernameText = document.getElementById("username-input");
 const usernameButton = document.getElementById("username-set-button");
 const debugButton = document.getElementById("debug");
@@ -120,28 +18,94 @@ const messageText = document.getElementById("message-input");
 const sendMessageButton = document.getElementById("send-message-button");
 
 const chatbox = document.getElementById("chatbox-info");
-let username =  "";
-let currentRoomId = ""
 
-debugButton.addEventListener("click", () => {
-    createRoom();
+
+let username =  "";
+let currentRoomId = "";
+
+
+let MAX_NAME_LENGTH = 20;
+
+//* Non-server functions
+function generateRoomId() {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+};
+
+function updateUsername(newName) {
+    // validation
+    if(!newName) {
+        alert('Error: username cannot be empty');
+        return;
+    };
+    if(newName.length > MAX_NAME_LENGTH) {
+        alert('Error: username is too long');
+        return;
+    };
+    if(currentRoomId) {
+        alert('Error: cannot change username whilst in a room');
+        return;
+    };
+
+    // logic
+    username = newName;
+    console.log(`Username changed to '${username}'`);
+};
+
+//* Server functions
+function createRoom(roomName, roomOwner) {
+    // validation
+    if(!roomName) {
+        alert('Error: room name cannot be empty');
+        return;
+    };
+    if(roomName.length > MAX_NAME_LENGTH) {
+        alert('Error: room name is too long');
+        return;
+    };
+    if(!username) {
+        alert('Error: username cannot be empty')
+        return;
+    }
+
+    // logic
+    const roomId = generateRoomId();
+    socket.emit('createRoom', { roomName: roomName, roomOwner: roomOwner, roomId: roomId});
+}
+
+socket.on('createRoomFailure', (message) => {
+    alert(`Error: ${message}`);
+});
+socket.on('createRoomSuccess', (data) => {
+    console.log(`Room created at ${data.roomId}:${data.roomName}`);
+    alert(`Room created at ${data.roomId}:${data.roomName}`);
+    roomIdText.innerHTML = data.roomId;
 });
 
+
+function deleteRoom(roomId, username) {
+    // validate 
+    if(!roomId) {alert('Error: cannot delete room if not in a room'); return;};
+    if(!username) {alert('Error: no username detected'); return;};
+
+    // logic
+    socket.emit('deleteRoom', { roomId: roomId, username: username });
+}
+
+//* Event listeners.
+
 usernameButton.addEventListener("click", () => {
-    setUsername();
-    console.log(`username set to ${username}`);
-    usernameButton.disabled = true;
-    usernameText.disabled = true;
+    updateUsername(usernameText.value);
+});
+
+debugButton.addEventListener("click", () => {
 });
 
 roomIdButton.addEventListener("click", () => {
-    joinRoom();
 });
 
 roomCreateButton.addEventListener("click", () => {
-    createRoom();
+    createRoom(roomnameText.value, username);
 })
 
 sendMessageButton.addEventListener("click", () => {
-    sendMessage();
 })
