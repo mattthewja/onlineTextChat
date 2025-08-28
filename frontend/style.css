@@ -1,0 +1,100 @@
+html {
+    font-family: 'Times New Roman', Times, serif;
+}
+
+#screen-flex-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+#screen-flex-container .container {
+    display:flex;
+}
+
+#username-info {
+    display:flex;
+    flex-direction: column;
+    border: solid 1px black;
+    border-bottom: 0;
+}
+
+#username-input {
+    border: solid 1px black;
+    border-radius: 5%;
+}
+
+#username-input:invalid + span::after {
+    content: "✖";
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#username-input:valid + span::after {
+    content: "✓";
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#roomId-input {
+    border: solid 1px black;
+    border-radius: 5%;
+}
+
+#roomId-input:invalid + span::after {
+    content: "✖";
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#roomId-input:valid + span::after {
+    content: "✓";
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#roomname-input {
+    border: solid 1px black;
+    border-radius: 5%;
+}
+
+#chatbox-info {
+    display: flex;
+    border: solid 1px black;
+    overflow: scroll;
+    height: 500px;
+}
+
+#chatbox-info .message {
+    display: flex;
+    flex-direction: row;
+    position:relative;
+    border: solid 1px black;
+    height:1.1em;
+    width: 100%
+}
+
+#chatbox-info .message .user-info {
+    position: relative;
+    border: solid 1px black;
+    height:inherit;
+    width: 30%;
+}
+
+#chatbox-info .message .message-info {
+    position: relative;
+    border: solid 1px black;
+    height: inherit;
+    width: 70%;
+}
+
+#message-box #message-input {
+    width: 100%;
+    max-width: 100vm;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+#message-box #send-message-button {
+    
+}

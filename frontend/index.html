@@ -2,15 +2,68 @@
 <html>
 <head>
     <title>App Title</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+    <div id="screen-flex-container" class="container">
+        <h1>Online Text Chat v1</h1>
+        <div id="username-info" class="container">
+            <div class="container">
+                <label for="username-input">Username: </label>
+                <input
+                type="text"
+                id="username-input"
+                name="username-input"
+                required
+                minlength="1"
+                size="auto" 
+                pattern="[a-z]{1,20}" />
+                <span class="validity"></span>
+                <button id="username-set-button">Set</button>
+                <button id="debug">Debug</button>
+            </div>
 
+            <div class="container">
+                <label for="roomId-input">RoomId: </label>
+                <input
+                type="text"
+                id="roomId-input"
+                name="roomId-input"
+                required
+                minlength="1"
+                size="auto" />
+                <span class="validity"></span>
+                <button id="roomId-set-button">Join</button>
+            </div>
 
+            <div class="container">
+                <label for="roomname-input">room name: </label>
+                <input
+                type="text"
+                id="roomname-input"
+                name="roomname-input"
+                required
+                minlength="1"
+                size="auto" 
+                pattern="[a-z]{1,20}"/>
+                <span class="validity"></span>
+                <button id="roomname-create-button">Create</button>
+            </div>
+       </div>
 
+        <div id="chatbox-info">
+            
+        </div>
+
+        <div id="message-box">
+            <textarea id="message-input" placeholder="Type your message here"></textarea>
+            <button id="send-message-button">send</button>
+        </div>
+    </div>
 
     <script src="socket.io/socket.io.js"></script> <!-- this path root/socket.io/socket.io.js is served to the user automatically with node + http or express -->
-    <script>const socket = io();</script>
+    <script src="script.js"></script>
 </body>
 
 </html>
