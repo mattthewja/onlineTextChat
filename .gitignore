@@ -4,6 +4,7 @@ backend/node_modules/
 # Environment config (API keys, secrets)
 .env
 backend/.env
+frontend/.env
 
 # OS and editor clutter
 .DS_Store

@@ -52,12 +52,86 @@ io.on('connection', (socket) => {
             return;
         }
         rooms[data.roomId] = room;
-        socket.emit('createRoomSuccess', { roomId: data.roomId, roomName: data.roomName });
+        socket.emit('createRoomSuccess', room);
+        socket.join(data.roomId);
+    })
+
+    socket.on('deleteRoom', (data) => {
+        // validate
+        if(!rooms[data.roomId]) {
+            socket.emit('deleteRoomFailure', 
+                { message: 'no room with roomId found'}
+            );
+            return;
+        };
+        const room = rooms[data.roomId];
+        if(data.username != room.owner) {
+            socket.emit('deleteRoomFailure', 
+                { message: `you are not the room owner. The owner is ${room.owner} and you are ${data.username}` }
+            );
+            return;
+        }
+
+        // logic
+        delete rooms[data.roomId];
+        socket.emit('deleteRoomSuccess',
+            { message: `Deleted room: ${room.roomId}:${room.name}` }
+        );
+        socket.leave(room.roomId);
+    });
+
+
+    socket.on('joinRoom', (data) => {
+        // validate
+        if(!rooms[data.roomId]) {
+            socket.emit('joinRoomFailure', 
+                { message: 'no room with roomId found'}
+            );
+            return;
+        };
+        const room = rooms[data.roomId];
+        if(room.users.has(data.username)) {
+            socket.emit('joinRoomFailure', 
+                { message: 'username already taken'}
+            );
+            return;
+        };
+
+        // logic
+        room.users.add(data.username);
+        socket.join(room.roomId);
+        socket.emit('joinRoomSuccess', { roomId: room.roomId, roomName: room.name });
+        socket.to(room.roomId).emit('userJoinedRoom', { message: `user ${data.username} has joined the room`});
     })
 
 
-    socket.on('deleteRoom', (data) => {
+    socket.on('leaveRoom', (data) => {
+        // validate
+        if(!rooms[data.roomId]) {
+            socket.emit('leaveRoomFailure', 
+                { message: 'no room with roomId found'}
+            );
+            return;
+        };
+        const room = rooms[data.roomId];
         
+        // logic --- combine logic with validation by checking for user in room
+        if(room.users.has(data.username)) {
+            socket.leave(room.roomId);
+            socket.emit('leaveRoomSuccess', { roomName: room.name });
+            socket.to(room.roomId).emit('userLeftRoom', { message: `user ${data.username} has left the room`});
+            room.users.delete(data.username);
+            return;
+        }
+
+        socket.emit('leaveRoomFailure', 
+            { message: `you cannot leave a room you are not a part of`}
+        );
+    });
+
+
+    socket.on('sendMessage', (data) => {
+        socket.to(data.roomId).emit('newMessage', data);
     })
 });
 

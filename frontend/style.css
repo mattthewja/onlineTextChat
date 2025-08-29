@@ -24,33 +24,9 @@ html {
     border-radius: 5%;
 }
 
-#username-input:invalid + span::after {
-    content: "✖";
-    padding-left: 5px;
-    padding-right: 5px;
-}
-
-#username-input:valid + span::after {
-    content: "✓";
-    padding-left: 5px;
-    padding-right: 5px;
-}
-
 #roomId-input {
     border: solid 1px black;
     border-radius: 5%;
-}
-
-#roomId-input:invalid + span::after {
-    content: "✖";
-    padding-left: 5px;
-    padding-right: 5px;
-}
-
-#roomId-input:valid + span::after {
-    content: "✓";
-    padding-left: 5px;
-    padding-right: 5px;
 }
 
 #roomname-input {
@@ -63,27 +39,26 @@ html {
     border: solid 1px black;
     overflow: scroll;
     height: 500px;
+    flex-direction: column;
 }
 
 #chatbox-info .message {
     display: flex;
     flex-direction: row;
     position:relative;
-    border: solid 1px black;
-    height:1.1em;
+    border-bottom: solid 1px black;
     width: 100%
 }
 
 #chatbox-info .message .user-info {
     position: relative;
-    border: solid 1px black;
     height:inherit;
     width: 30%;
+    border-right: solid 1px black;
 }
 
 #chatbox-info .message .message-info {
     position: relative;
-    border: solid 1px black;
     height: inherit;
     width: 70%;
 }
