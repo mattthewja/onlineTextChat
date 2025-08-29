@@ -13,6 +13,8 @@ const roomIdButton = document.getElementById("roomId-set-button");
 
 const roomnameText = document.getElementById("roomname-input");
 const roomCreateButton = document.getElementById("roomname-create-button");
+const roomDeleteButton = document.getElementById("room-delete-button");
+const roomLeaveButton = document.getElementById("room-leave-button");
 
 const messageText = document.getElementById("message-input");
 const sendMessageButton = document.getElementById("send-message-button");
@@ -22,14 +24,39 @@ const chatbox = document.getElementById("chatbox-info");
 
 let username =  "";
 let currentRoomId = "";
+let messages = [];
 
 
 let MAX_NAME_LENGTH = 20;
 
+
 //* Non-server functions
+// TODO: Move this function to the server
 function generateRoomId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
 };
+
+
+function renderMessages({ message, username }) {
+    // TODO
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message';
+
+    const userInfo = document.createElement('div');
+    userInfo.className = 'user-info';
+    userInfo.textContent = username;
+
+    const messageInfo = document.createElement('div');
+    messageInfo.className = 'message-info';
+    messageInfo.textContent = message;
+
+    messageDiv.appendChild(userInfo);
+    messageDiv.appendChild(messageInfo);
+    chatbox.appendChild(messageDiv);
+
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
+
 
 function updateUsername(newName) {
     // validation
@@ -63,22 +90,27 @@ function createRoom(roomName, roomOwner) {
         return;
     };
     if(!username) {
-        alert('Error: username cannot be empty')
+        alert('Error: username cannot be empty');
+        return;
+    };
+    if(currentRoomId) {
+        alert('Error: cannot create a room whilst in a room');
         return;
     }
 
     // logic
     const roomId = generateRoomId();
     socket.emit('createRoom', { roomName: roomName, roomOwner: roomOwner, roomId: roomId});
-}
+};
 
 socket.on('createRoomFailure', (message) => {
     alert(`Error: ${message}`);
 });
-socket.on('createRoomSuccess', (data) => {
-    console.log(`Room created at ${data.roomId}:${data.roomName}`);
-    alert(`Room created at ${data.roomId}:${data.roomName}`);
-    roomIdText.innerHTML = data.roomId;
+socket.on('createRoomSuccess', (room) => {
+    console.log(`Room created at ${room.roomId}:${room.name} with owner ${room.owner}`);
+    alert(`Room created at ${room.roomId}:${room.name} with owner ${room.owner}`);
+    roomIdText.value = room.roomId;
+    currentRoomId = room.roomId;
 });
 
 
@@ -89,7 +121,83 @@ function deleteRoom(roomId, username) {
 
     // logic
     socket.emit('deleteRoom', { roomId: roomId, username: username });
-}
+};
+
+socket.on('deleteRoomFailure', (data) => {
+    alert(`Error: ${data.message}`);
+});
+socket.on('deleteRoomSuccess', (data) => {
+    alert(`Success: ${data.message}`);
+});
+
+
+function joinRoom(roomId, username) {
+    // validate
+    if(!roomId) {alert('Error: room not found'); return;};
+    if(!username) {alert('Error: no username detected'); return;};
+
+    // clear chatbox
+    chatbox.innerHTML = '';
+
+    // logic
+    socket.emit('joinRoom', { roomId: roomId, username: username });
+};
+
+socket.on('joinRoomFailure', (data) => {
+    alert(`Error: ${data.message}`);
+});
+socket.on('joinRoomSuccess', (data) => {
+    currentRoomId = data.roomId;
+    roomIdText.value = data.roomId;
+    roomnameText.value = data.roomName;
+    console.log(`Joined room: ${data.roomId}:${data.roomName}`);
+    alert(`Joined room: ${data.roomId}:${data.roomName}`);
+});
+
+
+function leaveRoom(roomId, username) {
+    // validate
+    if(!roomId) {alert('Error: room not found'); return;};
+    if(!username) {alert('Error: no username detected'); return;};
+
+    // logic
+    socket.emit('leaveRoom', { roomId: roomId, username: username });
+};
+
+socket.on('leaveRoomFailure', (data) => {
+    alert(`Error: ${data.message}`);
+});
+socket.on('leaveRoomSuccess', (data) => {
+    roomIdText.value = '';
+    roomnameText.value ='';
+    console.log(`Left room ${data.roomName}`);
+});
+
+
+//* Real-Time in room Texting
+function sendMessage(messageData, username) {
+    // validate
+    if(!currentRoomId) {alert('Error: not currently in a room'); return;};
+
+    messageText.value = '';
+
+    const message = { message: messageData, username: username };
+
+    // local push
+    messages.push(message);
+    renderMessages(message);
+
+    // socket
+    socket.emit('sendMessage', 
+        { message: message, roomId: currentRoomId }
+    );
+};
+
+socket.on('newMessage', (data) => {
+    console.log(data.message)
+    messages.push(data.message);
+    renderMessages(data.message);
+});
 
 //* Event listeners.
 
@@ -101,11 +209,21 @@ debugButton.addEventListener("click", () => {
 });
 
 roomIdButton.addEventListener("click", () => {
+    joinRoom(roomIdText.value, username);
 });
+
+roomLeaveButton.addEventListener("click", () => {
+    leaveRoom(roomIdText.value, username);
+})
 
 roomCreateButton.addEventListener("click", () => {
     createRoom(roomnameText.value, username);
+});
+
+roomDeleteButton.addEventListener("click", () => {
+    deleteRoom(roomIdText.value, username);
 })
 
 sendMessageButton.addEventListener("click", () => {
-})
+    sendMessage(messageText.value, username);
+});
