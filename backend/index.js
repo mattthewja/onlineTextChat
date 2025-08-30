@@ -26,6 +26,14 @@ app.get('/', (req, res) => {
     res.json({ message: 'Backend is working' }); 
 });
 
+
+//* Helper functions
+
+function generateRoomId() {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+}
+
+
 //* HTTP polling
 
 
@@ -36,24 +44,39 @@ io.on('connection', (socket) => {
     console.log('a user connected to the network');
     socket.on('disconnect', () => {
         console.log('a user disconnected from the network');
+        if(socket.data.roomId && socket.data.username) {
+            rooms[socket.data.roomId].users.delete(socket.data.username);
+        };
+
+        if(!rooms[socket.data.roomId]) {return};
+
+        if(rooms[socket.data.roomId].owner == socket.data.username) {
+            delete rooms[socket.data.roomId]
+        };
     });
 
     // Socket integration
     socket.on('createRoom', (data) => {
+        const roomId = generateRoomId();
+
         const room = {
-            roomId: data.roomId,
+            roomId: roomId,
             name: data.roomName,
             owner: data.roomOwner,
             users: new Set([data.roomOwner])
         };
         // validate collision
-        if(rooms[data.roomId]) {
+        if(rooms[roomId]) {
             socket.emit('createRoomFailure', { message: 'ID Collision, please try again'});
             return;
         }
-        rooms[data.roomId] = room;
+        rooms[roomId] = room;
         socket.emit('createRoomSuccess', room);
-        socket.join(data.roomId);
+        socket.join(roomId);
+
+        // save socket data for disconnect logic
+        socket.data.username = data.roomOwner;
+        socket.data.roomId = roomId;
     })
 
     socket.on('deleteRoom', (data) => {
@@ -78,6 +101,9 @@ io.on('connection', (socket) => {
             { message: `Deleted room: ${room.roomId}:${room.name}` }
         );
         socket.leave(room.roomId);
+
+        // socket data for disconnect logic
+        socket.data.roomId = '';
     });
 
 
@@ -102,6 +128,10 @@ io.on('connection', (socket) => {
         socket.join(room.roomId);
         socket.emit('joinRoomSuccess', { roomId: room.roomId, roomName: room.name });
         socket.to(room.roomId).emit('userJoinedRoom', { message: `user ${data.username} has joined the room`});
+        
+        // socket disconnect data
+        socket.data.username = data.username;
+        socket.data.roomId = data.roomId;
     })
 
 
@@ -121,6 +151,10 @@ io.on('connection', (socket) => {
             socket.emit('leaveRoomSuccess', { roomName: room.name });
             socket.to(room.roomId).emit('userLeftRoom', { message: `user ${data.username} has left the room`});
             room.users.delete(data.username);
+
+            // socket disconnect data
+            socket.data.roomId = '';
+
             return;
         }
 

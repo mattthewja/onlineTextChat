@@ -1,3 +1,8 @@
+[3]
+- fix: users unable to change username after leaving rooms
+- refactor: move generateId logic into backend server
+
+
 [2]
 - feat: socket integration in script.js and index.js for deleteRoom function
 - feat: add deleteRoom button seperate from debug button

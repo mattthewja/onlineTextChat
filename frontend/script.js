@@ -31,11 +31,6 @@ let MAX_NAME_LENGTH = 20;
 
 
 //* Non-server functions
-// TODO: Move this function to the server
-function generateRoomId() {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
-};
-
 
 function renderMessages({ message, username }) {
     // TODO
@@ -99,8 +94,7 @@ function createRoom(roomName, roomOwner) {
     }
 
     // logic
-    const roomId = generateRoomId();
-    socket.emit('createRoom', { roomName: roomName, roomOwner: roomOwner, roomId: roomId});
+    socket.emit('createRoom', { roomName: roomName, roomOwner: roomOwner });
 };
 
 socket.on('createRoomFailure', (message) => {
@@ -108,7 +102,6 @@ socket.on('createRoomFailure', (message) => {
 });
 socket.on('createRoomSuccess', (room) => {
     console.log(`Room created at ${room.roomId}:${room.name} with owner ${room.owner}`);
-    alert(`Room created at ${room.roomId}:${room.name} with owner ${room.owner}`);
     roomIdText.value = room.roomId;
     currentRoomId = room.roomId;
 });
@@ -151,7 +144,6 @@ socket.on('joinRoomSuccess', (data) => {
     roomIdText.value = data.roomId;
     roomnameText.value = data.roomName;
     console.log(`Joined room: ${data.roomId}:${data.roomName}`);
-    alert(`Joined room: ${data.roomId}:${data.roomName}`);
 });
 
 
@@ -170,6 +162,7 @@ socket.on('leaveRoomFailure', (data) => {
 socket.on('leaveRoomSuccess', (data) => {
     roomIdText.value = '';
     roomnameText.value ='';
+    currentRoomId = '';
     console.log(`Left room ${data.roomName}`);
 });
 
