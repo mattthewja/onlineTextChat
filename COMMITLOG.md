@@ -1,22 +1,72 @@
-[3]
-- fix: users unable to change username after leaving rooms
-- refactor: move generateId logic into backend server
+# CHANGELOG
 
+## Commit Types
+- feat
+- fix 
+- docs
+- style
+- refactor
+- perf
+- test
+- build
+- ci 
+- chore 
+- revert
 
-[2]
-- feat: socket integration in script.js and index.js for deleteRoom function
-- feat: add deleteRoom button seperate from debug button
-- feat: socket integration in script.js and index.js for joinRoom function
-- feat: socket integration in script.js and index.js for leaveRoom function
-- feat: socket integration in script.js and index.js for sendMessage function
-- fix: made it not possible for users to create a new room whilst in a room
-- chore: add frontend/.env to .gitignore
+---
 
+## [v0.3.1]
+### Chores & Refactors
+- chore: Improve COMMITLOG.md
 
+## [v0.3.0]
+### Breaking
+- IMPORTANT: Complete codebase rewrite. Deleted most REST logic; Socket.IO integration is now prioritized.
 
-[1]
-- IMPORTANT: Complete codebase rewrite. Deleted most work with Rest. Integration with socket prioritised during rewrite
-- feat: rewrote update username
-- feat: socket integration in script.js and index.js for createRoom function
-- refactor: moved roomId generation to frontend function
-- chore: re-order code in script.js to be more easily understood which sections do what
+### Features
+- feat: Socket integration for all major functions (createRoom, joinRoom, leaveRoom, sendMessage, deleteRoom)
+- feat: Add deleteRoom button separate from debug
+- feat: Allow updating username via socket
+- feat: Moved roomId generation to frontend function
+
+### Fixes
+- fix: Prevent users from creating a room while already in one
+- fix: Users unable to change username after leaving rooms
+
+### Chores & Refactors
+- refactor: Move generateId logic to backend
+- refactor: Reorganize script.js for clarity
+- chore: Add frontend/.env to .gitignore
+
+---
+
+## [v0.2.0]
+### Features
+- feat: Add socket.io library (npm install socket.io)
+- feat: Basic socket.io server connection via localhost:3000
+- feat: Add basic HTML to index.html
+
+### Testing
+- test: Add .test.js files for all current routes in /test folder
+
+---
+
+## [v0.1.0]
+### Features
+- feat: Add route /leaveRoom
+- feat: Add route /kickUser
+
+### Fixes
+- fix: Improve invalid input handling across routes
+
+### Chores
+- chore: Add .gitignore and remove node_modules from version control
+
+### Testing
+- test: Add supertest and chai setup
+
+---
+
+## [v0.0.1]
+### Initial
+- initial commit
