@@ -20,11 +20,13 @@ const messageText = document.getElementById("message-input");
 const sendMessageButton = document.getElementById("send-message-button");
 
 const chatbox = document.getElementById("chatbox-info");
+const userlist = document.getElementById("userlist");
 
 
 let username =  "";
 let currentRoomId = "";
 let messages = [];
+let usersInRoom = [];
 
 
 let MAX_NAME_LENGTH = 20;
@@ -33,7 +35,6 @@ let MAX_NAME_LENGTH = 20;
 //* Non-server functions
 
 function renderMessages({ message, username }) {
-    // TODO
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message';
 
@@ -50,6 +51,19 @@ function renderMessages({ message, username }) {
     chatbox.appendChild(messageDiv);
 
     chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+
+function renderUserList(usersInRoom) {
+    // TODO: Currently not rendering correctly
+    userlist.innerHTML = '';
+    usersInRoom.forEach(user => {
+        const userDiv = document.createElement('div');
+        userDiv.className = 'userInList';
+
+        userDiv.textContent = 'User: ' + user;
+        userlist.appendChild(userDiv);
+    });
 }
 
 
@@ -104,6 +118,8 @@ socket.on('createRoomSuccess', (room) => {
     console.log(`Room created at ${room.roomId}:${room.name} with owner ${room.owner}`);
     roomIdText.value = room.roomId;
     currentRoomId = room.roomId;
+    usersInRoom = [room.owner];
+    renderUserList(usersInRoom);
 });
 
 
@@ -143,9 +159,16 @@ socket.on('joinRoomSuccess', (data) => {
     currentRoomId = data.roomId;
     roomIdText.value = data.roomId;
     roomnameText.value = data.roomName;
+    usersInRoom = data.users;
+    renderUserList(usersInRoom);
     console.log(`Joined room: ${data.roomId}:${data.roomName}`);
 });
 
+socket.on('userJoinedRoom', (data) => { 
+    console.log(`${data.message}`);
+    usersInRoom.push(data.username);
+    renderUserList(usersInRoom);
+});
 
 function leaveRoom(roomId, username) {
     // validate
@@ -166,6 +189,9 @@ socket.on('leaveRoomSuccess', (data) => {
     console.log(`Left room ${data.roomName}`);
 });
 
+socket.on('userLeftRoom', (data) => {
+    userlist.remove(data.username);
+});
 
 //* Real-Time in room Texting
 function sendMessage(messageData, username) {
@@ -199,6 +225,8 @@ usernameButton.addEventListener("click", () => {
 });
 
 debugButton.addEventListener("click", () => {
+    console.log(usersInRoom);
+    renderUserList(usersInRoom);
 });
 
 roomIdButton.addEventListener("click", () => {

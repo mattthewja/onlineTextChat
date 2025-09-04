@@ -126,8 +126,8 @@ io.on('connection', (socket) => {
         // logic
         room.users.add(data.username);
         socket.join(room.roomId);
-        socket.emit('joinRoomSuccess', { roomId: room.roomId, roomName: room.name });
-        socket.to(room.roomId).emit('userJoinedRoom', { message: `user ${data.username} has joined the room`});
+        socket.emit('joinRoomSuccess', { roomId: room.roomId, roomName: room.name, users: Array.from(room.users) });
+        socket.to(room.roomId).emit('userJoinedRoom', { message: `user ${data.username} has joined the room`, username: `${data.username}`});
         
         // socket disconnect data
         socket.data.username = data.username;
@@ -149,7 +149,7 @@ io.on('connection', (socket) => {
         if(room.users.has(data.username)) {
             socket.leave(room.roomId);
             socket.emit('leaveRoomSuccess', { roomName: room.name });
-            socket.to(room.roomId).emit('userLeftRoom', { message: `user ${data.username} has left the room`});
+            socket.to(room.roomId).emit('userLeftRoom', { message: `user ${data.username} has left the room`, username: data.username });
             room.users.delete(data.username);
 
             // socket disconnect data

@@ -15,6 +15,14 @@
 
 ---
 
+## [v0.4.0]
+### Features
+- feat: Add logic for Sockets disconnecting
+- feat: Add userlist logic
+
+### Fixes
+- fix: test room 456 having the incorrect roomId
+
 ## [v0.3.1]
 ### Chores & Refactors
 - chore: Improve COMMITLOG.md
